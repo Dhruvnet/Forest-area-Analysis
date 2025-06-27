@@ -2,18 +2,14 @@
 
 This project implements **semantic segmentation** using the **U-Net architecture**, focused on analyzing aerial or satellite imagery to detect forested areas. It supports both **image** and **video** inputs, using a trained deep learning model.
 
-[Open in Google Colab](https://colab.research.google.com/drive/1tBKoZH-HV0F8APzJiP9wA1O0fU4UeOOw?usp=sharing)
-
 ---
 
 ## 📚 Table of Contents
 
 - [Overview](#overview)  
 - [Dataset](#dataset)  
-- [U-Net Architecture](#u-net-architecture)  
-- [Colab Workflow](#colab-workflow)  
+- [U-Net Architecture](#u-net-architecture)   
 - [Image Segmentation](#image-segmentation)  
-- [Video Segmentation](#video-segmentation)  
 - [Results](#results)  
 - [Dependencies](#dependencies)
 
@@ -48,28 +44,36 @@ Preprocessing steps:
 
 ## 🧠 U-Net Architecture
 
-U-Net is a convolutional neural network designed for biomedical and environmental image segmentation.
+Our model follows the classic U-Net architecture with custom modifications to improve feature learning, reduce overfitting, and handle high-resolution imagery better. The U-Net consists of an **encoder-decoder structure** with **skip connections** that combine high-level semantic features with low-level spatial details.
 
-### Architecture Highlights:
-- **Encoder**: Convolution + MaxPooling
-- **Bottleneck**: Deep features
-- **Decoder**: Transposed Convolution + Skip Connections
+#### 🔹 1. Encoder (Contracting Path)
+The encoder progressively captures spatial and contextual features using a series of convolutional layers.
 
-The model captures spatial context and reconstructs pixel-level masks.
+- Each block in the encoder contains:
+  - Two **3x3 convolutional layers** (with padding)
+  - **ReLU** activation
+  - **Batch Normalization**
+  - **2x2 Max Pooling** for downsampling
+- Feature channels are doubled at each depth level:
+  - Example: 64 → 128 → 256 → 512
 
----
+#### 🔹 2. Bottleneck
+The bridge between encoder and decoder.
 
-## 🚀 Colab Workflow
+- Two convolutional layers with ReLU and BatchNorm
+- High-depth features (e.g., 1024 filters) learned here
 
-Everything runs in a Colab notebook:
+#### 🔹 3. Decoder (Expanding Path)
+Upsamples the feature maps and combines them with corresponding encoder features to reconstruct spatial resolution.
 
-- Load and preprocess data
-- Build U-Net model
-- Train and validate
-- Save model (`model.h5`)
-- Run predictions on new data (images or videos)
+- Each block includes:
+  - **Transpose Convolution (UpSampling)**
+  - **Concatenation** with encoder features (skip connection)
+  - Two **3x3 Convolutional layers** with ReLU and BatchNorm
 
-👉 [Launch Colab Notebook](https://colab.research.google.com/drive/1tBKoZH-HV0F8APzJiP9wA1O0fU4UeOOw?usp=sharing)
+#### 🔹 4. Output Layer
+- **1x1 Convolution** to reduce feature map to a single channel (for binary segmentation)
+- **Sigmoid Activation** to produce per-pixel probability map (0 to 1)
 
 ---
 
@@ -103,9 +107,15 @@ To process a video:
 
 The model performs well in distinguishing between forest and non-forest regions. Visual results show sharp boundaries and good generalization even on unseen data.
 
-### Metrics (example):
-- Dice Coefficient: `0.87`
-- IoU Score: `0.78`
+| **Metric**           | **Score** |
+|----------------------|-----------|
+| **Accuracy**         | 0.8363    |
+| **Dice Coefficient** | 0.8039    |
+| **F1 Score**         | 0.8662    |
+| **IoU Score**        | 0.6724    |
+| **Loss**             | 0.3678    |
+| **Precision**        | 0.8417    |
+| **Recall**           | 0.8933    |`
 
 ---
 
